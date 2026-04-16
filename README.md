@@ -641,7 +641,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 3. [Praveen R](https://github.com/PRAVEENRAMU14)
 4. [Tharun Babu V](https://github.com/TharunBabu-05)
 
-   <div align="center">
+<div align="center">
 ### 🌟 Star this repo if you find it helpful! 🌟
 
 Made with ❤️ for accessibility
