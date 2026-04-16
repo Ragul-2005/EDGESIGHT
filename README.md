@@ -14,7 +14,7 @@
 [🌐 Website](#-website-features) • [📱 Mobile App](#-mobile-app-features) • [🚀 Quick Start](#-quick-start) • [📖 Documentation](#-api-documentation)
 
 ---
-![alt text](<WhatsApp Image 2026-01-05 at 12.07.21 AM.jpeg>)
+
 </div>
 
 ## 📋 Table of Contents
