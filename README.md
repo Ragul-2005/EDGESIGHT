@@ -635,13 +635,15 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-<div align="center">
 
-Team Members:
-1. Senbagaseelan V:https://github.com/Senbagaseelan18
-2. Ragul T: https://github.com/Ragul-2005
-3. Praveen R: https://github.com/PRAVEENRAMU14
-4. Tharun Babu V: https://github.com/TharunBabu-05
+
+## Team Members:
+1. [Senbagaseelan V](https://github.com/Senbagaseelan18)
+2. [Ragul T](https://github.com/Ragul-2005)
+3. [Praveen R](https://github.com/PRAVEENRAMU14)
+4. [Tharun Babu V](https://github.com/TharunBabu-05)
+
+   <div align="center">
 ### 🌟 Star this repo if you find it helpful! 🌟
 
 Made with ❤️ for accessibility
