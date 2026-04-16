@@ -630,7 +630,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Google Gemini** - For powerful AI capabilities
 - **YOLOv8** - For object detection
-- **Flutter Team** - For excellent mobile framework
 - **OpenCV** - For computer vision
 - **Flask** - For simple yet powerful backend
 
@@ -638,6 +637,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
 
+Team Members:
+1. Senbagaseelan V:https://github.com/Senbagaseelan18
+2. Ragul T: https://github.com/Ragul-2005
+3. Praveen R: https://github.com/PRAVEENRAMU14
+4. Tharun Babu V: https://github.com/TharunBabu-05
 ### 🌟 Star this repo if you find it helpful! 🌟
 
 Made with ❤️ for accessibility
@@ -647,3 +651,4 @@ Made with ❤️ for accessibility
 ![Footer](https://img.shields.io/badge/Built%20with-Love%20%26%20AI-ff69b4?style=for-the-badge)
 
 </div>
+
