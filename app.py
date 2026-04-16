@@ -8,7 +8,7 @@ MICRO Voice Assistant + NEON OCR + FPGA Object Detection + AI DIARY
 - Saying "OCR" / "scan text" / "object detection" / "diary" in chatbot will navigate.
 """
 
-from flask import Flask, jsonify, Response, send_from_directory, request
+from flask import Flask, jsonify, Response, send_from_directory, request, render_template
 from dotenv import load_dotenv
 import os, subprocess, threading, re, requests, speech_recognition as sr
 import cv2, pytesseract, time, sqlite3, json
@@ -23,6 +23,10 @@ load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
     raise RuntimeError("GEMINI_API_KEY missing in .env")
+
+GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
+if not GOOGLE_MAPS_API_KEY:
+    raise RuntimeError("GOOGLE_MAPS_API_KEY missing in .env")
 
 GEN_API_URL = (
     "https://generativelanguage.googleapis.com/v1beta/models/"
@@ -2379,7 +2383,7 @@ def analytics_most_used():
 @app.route("/location")
 def location_page():
     """Serve location tracking page."""
-    return send_from_directory(".", "location.html")
+    return render_template("location.html", GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY)
 
 
 @app.route("/location_data")
@@ -2616,7 +2620,7 @@ def search_nearby_places(lat, lng, query):
         import requests
         
         # Use Text Search API (more likely to be enabled)
-        api_key = 'AIzaSyCuSnIyiJnQs6RTrtsN7m_aSIOfP4RT_9U'
+        api_key = GOOGLE_MAPS_API_KEY
         
         # Build search query
         search_query = query
@@ -2686,7 +2690,7 @@ def get_navigation_route(origin_lat, origin_lng, destination):
         import googlemaps
         
         # Initialize Google Maps client (using the same API key from the HTML)
-        gmaps = googlemaps.Client(key='AIzaSyCuSnIyiJnQs6RTrtsN7m_aSIOfP4RT_9U')
+        gmaps = googlemaps.Client(key=GOOGLE_MAPS_API_KEY)
         
         # Get directions
         directions_result = gmaps.directions(
