@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>EDGE SIGHT - MEDICAL ASSISTANCE</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    height:100vh;
+    overflow:hidden;
+    background:
+        radial-gradient(circle at top left,#1e40af 0,transparent 45%),
+        radial-gradient(circle at bottom right,#d946ef 0,transparent 45%),
+        #020617;
+    color:#e5e7eb;
+    position:relative;
+}
+
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background-image:
+        linear-gradient(#11182733 1px,transparent 1px),
+        linear-gradient(90deg,#11182733 1px,transparent 1px);
+    background-size:40px 40px;
+    opacity:0.4;
+    z-index:0;
+}
+
+.wrapper{
+    width:90%;
+    max-width:1300px;
+    margin:24px auto;
+    position:relative;
+    z-index:1;
+    height:calc(100vh - 48px);
+    display:flex;
+    flex-direction:column;
+}
+
+.header{
+    text-align:center;
+    margin-bottom:24px;
+}
+
+.header-title{
+    font-size:36px;
+    font-weight:700;
+    letter-spacing:0.08em;
+    color:#e5e7eb;
+    margin-bottom:8px;
+}
+
+.header-sub{
+    font-size:14px;
+    color:#9ca3af;
+}
+
+.main-container{
+    display:grid;
+    grid-template-columns:1fr 1.2fr;
+    gap:20px;
+    flex:1;
+    overflow:hidden;
+}
+
+.card{
+    padding:24px;
+    border-radius:20px;
+    background:rgba(15,23,42,0.9);
+    border:1px solid #1f2937;
+    box-shadow:0 18px 45px rgba(0,0,0,0.7);
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+}
+
+.card h2{
+    color:#a5b4fc;
+    margin-bottom:16px;
+    font-size:18px;
+    letter-spacing:0.16em;
+    font-weight:700;
+}
+
+/* CONTROL PANEL */
+.control-panel{
+    gap:16px;
+}
+
+.status-section{
+    background:rgba(15,23,42,0.5);
+    padding:20px;
+    border-radius:16px;
+    border:1px solid #0ea5e977;
+    box-shadow:0 0 25px rgba(8,47,73,0.8);
+    margin-bottom:16px;
+}
+
+.status-text{
+    font-size:14px;
+    color:#cbd5e1;
+    margin-bottom:12px;
+    line-height:1.6;
+}
+
+.disclaimer{
+    font-size:12px;
+    color:#fca5a5;
+    background:rgba(239,68,68,0.1);
+    padding:12px;
+    border-radius:8px;
+    border-left:3px solid #ef4444;
+    margin-bottom:16px;
+    font-weight:600;
+}
+
+.status-tag{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:rgba(15,23,42,0.9);
+    border-radius:999px;
+    padding:6px 14px;
+    border:1px solid #22c55e;
+    color:#bbf7d0;
+    font-size:12px;
+    font-weight:600;
+}
+
+.status-dot{
+    width:8px;
+    height:8px;
+    border-radius:999px;
+    background:#22c55e;
+    box-shadow:0 0 8px #22c55e;
+}
+
+.control-buttons{
+    display:flex;
+    gap:12px;
+    flex-direction:column;
+}
+
+.btn{
+    padding:14px 20px;
+    border-radius:12px;
+    border:none;
+    font-weight:600;
+    cursor:pointer;
+    font-size:14px;
+    transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+}
+
+.btn-primary{
+    background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+    color:white;
+    box-shadow:0 4px 16px rgba(102,126,234,0.3);
+}
+
+.btn-primary:hover:not(:disabled){
+    transform:translateY(-2px);
+    box-shadow:0 8px 24px rgba(102,126,234,0.5);
+}
+
+.btn-primary:disabled{
+    opacity:0.5;
+    cursor:not-allowed;
+}
+
+.btn-danger{
+    background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);
+    color:white;
+    box-shadow:0 4px 16px rgba(239,68,68,0.3);
+}
+
+.btn-danger:hover:not(:disabled){
+    transform:translateY(-2px);
+    box-shadow:0 8px 24px rgba(239,68,68,0.5);
+}
+
+.btn-danger:disabled{
+    opacity:0.5;
+    cursor:not-allowed;
+}
+
+.btn-secondary{
+    background:linear-gradient(135deg,#8b5cf6 0%,#a855f7 100%);
+    color:white;
+    box-shadow:0 4px 16px rgba(139,92,246,0.3);
+}
+
+.btn-secondary:hover:not(:disabled){
+    transform:translateY(-2px);
+    box-shadow:0 8px 24px rgba(139,92,246,0.5);
+}
+
+.btn-secondary:disabled{
+    opacity:0.5;
+    cursor:not-allowed;
+}
+
+.btn-exit{
+    background:linear-gradient(135deg,#06b6d4 0%,#0891b2 100%);
+    color:white;
+    box-shadow:0 4px 16px rgba(6,182,212,0.3);
+    margin-top:auto;
+}
+
+.btn-exit:hover:not(:disabled){
+    transform:translateY(-2px);
+    box-shadow:0 8px 24px rgba(6,182,212,0.5);
+}
+
+/* NOTES PANEL */
+.notes-panel{
+    overflow-y:auto;
+}
+
+.notes-panel::-webkit-scrollbar{
+    width:6px;
+}
+
+.notes-panel::-webkit-scrollbar-track{
+    background:transparent;
+}
+
+.notes-panel::-webkit-scrollbar-thumb{
+    background:rgba(255,255,255,0.2);
+    border-radius:10px;
+}
+
+.note-item{
+    background:rgba(15,23,42,0.5);
+    padding:16px;
+    border-radius:12px;
+    margin-bottom:12px;
+    border:1px solid #0ea5e977;
+    transition:all 0.3s;
+    cursor:pointer;
+}
+
+.note-item:hover{
+    background:rgba(15,23,42,0.8);
+    border-color:#0ea5e9;
+    box-shadow:0 0 15px rgba(14,165,233,0.3);
+    transform:translateX(4px);
+}
+
+.note-date{
+    font-size:12px;
+    color:#9ca3af;
+    margin-bottom:6px;
+    font-weight:600;
+    letter-spacing:0.05em;
+}
+
+.note-time{
+    font-size:11px;
+    color:#6b7280;
+}
+
+.note-health{
+    font-size:14px;
+    color:#e5e7eb;
+    line-height:1.5;
+    margin-top:8px;
+    max-height:80px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    display:-webkit-box;
+    -webkit-line-clamp:3;
+    -webkit-box-orient:vertical;
+}
+
+.note-tips{
+    font-size:12px;
+    color:#60a5fa;
+    margin-top:8px;
+    font-style:italic;
+    max-height:60px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+}
+
+.empty-state{
+    text-align:center;
+    padding:40px 20px;
+    color:#6b7280;
+}
+
+.empty-icon{
+    font-size:48px;
+    margin-bottom:16px;
+    opacity:0.5;
+}
+
+/* ANIMATIONS */
+@keyframes pulse{
+    0%,100%{opacity:1;}
+    50%{opacity:0.7;}
+}
+
+@keyframes fadeInUp{
+    from{
+        opacity:0;
+        transform:translateY(20px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+.card{
+    animation:fadeInUp 0.6s ease-out;
+}
+
+.recording-indicator{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:8px 16px;
+    background:rgba(239,68,68,0.1);
+    border:1px solid rgba(239,68,68,0.3);
+    border-radius:999px;
+    color:#fca5a5;
+    font-size:13px;
+    font-weight:600;
+    margin-bottom:12px;
+    animation:pulse 2s ease-in-out infinite;
+}
+
+.recording-indicator .dot{
+    width:8px;
+    height:8px;
+    background:#ef4444;
+    border-radius:999px;
+    box-shadow:0 0 8px #ef4444;
+}
+
+.processing-indicator{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:8px 16px;
+    background:rgba(59,130,246,0.1);
+    border:1px solid rgba(59,130,246,0.3);
+    border-radius:999px;
+    color:#93c5fd;
+    font-size:13px;
+    font-weight:600;
+    animation:pulse 2s ease-in-out infinite;
+}
+
+.processing-indicator .dot{
+    width:8px;
+    height:8px;
+    background:#3b82f6;
+    border-radius:999px;
+    box-shadow:0 0 8px #3b82f6;
+}
+
+@media(max-width:1000px){
+    .main-container{
+        grid-template-columns:1fr;
+    }
+}
+
+@media(max-width:600px){
+    .wrapper{
+        width:95%;
+    }
+    
+    .header-title{
+        font-size:28px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrapper">
+    
+    <div class="header">
+        <div class="header-title">⚕️ MEDICAL ASSISTANCE</div>
+        <div class="header-sub">Voice-Powered Health Notes with AI Wellness Tips</div>
+    </div>
+
+    <div class="main-container">
+        
+        <!-- LEFT: CONTROL PANEL -->
+        <div class="card control-panel">
+            <h2>Voice Control</h2>
+            
+            <div class="disclaimer">
+                ⚠️ DISCLAIMER: This is NOT a medical diagnosis. Please consult a qualified doctor for professional medical advice.
+            </div>
+
+            <div class="status-section">
+                <div class="status-text">Record your health concern using voice. AI will provide general wellness tips and common information.</div>
+                <div id="statusIndicator" class="status-tag" style="display:none;">
+                    <div class="status-dot"></div>
+                    <span id="statusText">Ready</span>
+                </div>
+            </div>
+
+            <div id="recordingIndicator" class="recording-indicator" style="display:none;">
+                <div class="dot"></div>
+                <span>Recording...</span>
+            </div>
+
+            <div id="processingIndicator" class="processing-indicator" style="display:none;">
+                <div class="dot"></div>
+                <span>Processing Tips...</span>
+            </div>
+
+            <div class="control-buttons">
+                <button id="startBtn" class="btn btn-primary" onclick="startMedical()">
+                    🎤 Start Medical Note
+                </button>
+                
+                <button id="stopBtn" class="btn btn-danger" onclick="stopMedical()" disabled>
+                    ⏹ Stop Recording
+                </button>
+
+                <button id="readLastBtn" class="btn btn-secondary" onclick="readLast()">
+                    📋 Read Last Note
+                </button>
+
+                <button class="btn btn-exit" onclick="exitMedical()">
+                    ← Return to Chat
+                </button>
+            </div>
+        </div>
+
+        <!-- RIGHT: NOTES DISPLAY -->
+        <div class="card notes-panel">
+            <h2>Medical Notes</h2>
+            <div id="notesList"></div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+let isRecording = false;
+let lastNoteSeq = 0;
+let pollInterval = null;
+let lastStartTime = null;
+
+// ===== VOICE INITIALIZATION =====
+const synth = window.speechSynthesis;
+const recognizer = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+
+recognizer.lang = 'en-US';
+recognizer.continuous = false;
+recognizer.interimResults = true;
+
+// ===== MEDICAL CONTROL FUNCTIONS =====
+function startMedical(){
+    fetch("/medical_start")
+        .then(r => r.json())
+        .then(data => {
+            if(data.status === "medical_recording_started"){                // Capture start time for activity logging
+                const now = new Date();
+                lastStartTime = now.getHours().toString().padStart(2,'0') + ':' + 
+                               now.getMinutes().toString().padStart(2,'0') + ':' + 
+                               now.getSeconds().toString().padStart(2,'0');
+                                isRecording = true;
+                document.getElementById("startBtn").disabled = true;
+                document.getElementById("stopBtn").disabled = false;
+                document.getElementById("recordingIndicator").style.display = "flex";
+                document.getElementById("statusIndicator").style.display = "flex";
+                document.getElementById("statusText").textContent = "Recording...";
+                
+                speakFeedback("I am listening. Please describe how you are feeling or your health concern.");
+            }
+        })
+        .catch(err => console.log("Start error:", err));
+}
+
+function stopMedical(){
+    fetch("/medical_stop")
+        .then(r => r.json())
+        .then(data => {
+            if(data.health_note){
+                isRecording = false;
+                document.getElementById("startBtn").disabled = false;
+                document.getElementById("stopBtn").disabled = true;
+                document.getElementById("recordingIndicator").style.display = "none";
+                document.getElementById("processingIndicator").style.display = "flex";
+                
+                // Log activity
+                if(lastStartTime){
+                    const now = new Date();
+                    const endTime = now.getHours().toString().padStart(2,'0') + ':' + 
+                                   now.getMinutes().toString().padStart(2,'0') + ':' + 
+                                   now.getSeconds().toString().padStart(2,'0');
+                    
+                    fetch("/log_activity", {
+                        method: "POST",
+                        headers: {"Content-Type": "application/json"},
+                        body: JSON.stringify({
+                            module: "medical",
+                            start_time: lastStartTime,
+                            end_time: endTime
+                        })
+                    }).catch(err => console.log("Activity log error:", err));
+                }
+                
+                setTimeout(() => {
+                    document.getElementById("processingIndicator").style.display = "none";
+                    
+                    const tips = data.ai_tips || "Please consult a doctor for professional medical advice.";
+                    const feedback = `I have recorded your health note. ${tips}`;
+                    
+                    speakFeedback(feedback);
+                    loadNotes();
+                }, 1500);
+            }
+        })
+        .catch(err => console.log("Stop error:", err));
+}
+
+function readLast(){
+    fetch("/medical_read_last")
+        .then(r => r.text())
+        .then(text => {
+            speakFeedback(text);
+        })
+        .catch(err => console.log("Read error:", err));
+}
+
+function exitMedical(){
+    if(pollInterval){
+        clearInterval(pollInterval);
+    }
+    speakFeedback("Returning to the main AI chat.");
+    setTimeout(() => {
+        window.location.href = "/";
+    }, 1500);
+}
+
+function speakFeedback(text){
+    synth.cancel();
+    let utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1.0;
+    synth.speak(utterance);
+}
+
+// ===== LOAD NOTES =====
+function loadNotes(){
+    fetch("/medical_list")
+        .then(r => r.json())
+        .then(data => {
+            let html = "";
+            if(data.length === 0){
+                html = '<div class="empty-state"><div class="empty-icon">📝</div><div>No medical notes yet. Start recording to create your first note!</div></div>';
+            } else {
+                data.forEach(note => {
+                    html += `
+                        <div class="note-item" onclick="readNote('${note.health.replace(/'/g, "\\'")}', '${note.tips.replace(/'/g, "\\'")}'')">
+                            <div class="note-date">${note.date}</div>
+                            <div class="note-time">${note.time}</div>
+                            <div class="note-health"><strong>Health Concern:</strong> ${note.health}</div>
+                            <div class="note-tips"><strong>AI Tips:</strong> ${note.tips}</div>
+                        </div>
+                    `;
+                });
+            }
+            document.getElementById("notesList").innerHTML = html;
+        })
+        .catch(err => console.log("Load notes error:", err));
+}
+
+function readNote(health, tips){
+    const text = `Health concern: ${health}. AI suggestions: ${tips}`;
+    speakFeedback(text);
+}
+
+// ===== VOICE COMMAND RECOGNITION =====
+recognizer.onstart = () => {
+    console.log("Voice recognition started");
+};
+
+recognizer.onresult = (event) => {
+    let transcript = "";
+    for(let i = event.resultIndex; i < event.results.length; i++){
+        transcript += event.results[i][0].transcript.toLowerCase();
+    }
+    
+    console.log("Transcript:", transcript);
+    
+    if(event.results[event.results.length - 1].isFinal){
+        if(transcript.includes("start") || transcript.includes("begin")){
+            startMedical();
+        } else if(transcript.includes("stop") || transcript.includes("done")){
+            stopMedical();
+        } else if(transcript.includes("read last") || transcript.includes("last note")){
+            readLast();
+        } else if(transcript.includes("exit") || transcript.includes("go back") || transcript.includes("return")){
+            exitMedical();
+        }
+    }
+};
+
+recognizer.onerror = (event) => {
+    console.log("Recognition error:", event.error);
+};
+
+// ===== INITIALIZATION =====
+window.onload = () => {
+    loadNotes();
+    
+    // Greet user with voice
+    setTimeout(() => {
+        speakFeedback("Medical assistance opened. Say 'start medical note' to describe your health condition, or say 'exit medical assistance' to return to the main chat.");
+    }, 500);
+    
+    // Start listening for voice commands
+    recognizer.start();
+    
+    // Poll for new notes
+    pollInterval = setInterval(() => {
+        loadNotes();
+    }, 2000);
+};
+
+window.addEventListener("beforeunload", () => {
+    if(pollInterval){
+        clearInterval(pollInterval);
+    }
+    recognizer.stop();
+});
+</script>
+
+</body>
+</html>

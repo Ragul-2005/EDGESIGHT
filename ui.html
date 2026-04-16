@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>MICRO Voice Assistant</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    background:linear-gradient(135deg,#667eea 0%,#764ba2 25%,#f093fb 50%,#4facfe 75%,#00f2fe 100%);
+    background-size:400% 400%;
+    animation:gradientShift 15s ease infinite;
+    height:100vh;overflow:hidden;
+    position:relative;
+}
+@keyframes gradientShift{
+    0%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+    100%{background-position:0% 50%;}
+}
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:radial-gradient(circle at 20% 50%,rgba(120,119,198,0.3),transparent 50%),
+                radial-gradient(circle at 80% 80%,rgba(255,119,198,0.3),transparent 50%),
+                radial-gradient(circle at 40% 20%,rgba(120,219,255,0.3),transparent 50%);
+    animation:float 20s ease-in-out infinite;
+    pointer-events:none;
+    z-index:0;
+}
+@keyframes float{
+    0%,100%{transform:translateY(0px) rotate(0deg);}
+    50%{transform:translateY(-20px) rotate(5deg);}
+}
+body::after{
+    content:"";
+    position:fixed;
+    inset:0;
+    background-image:
+        radial-gradient(2px 2px at 20% 30%,rgba(255,255,255,0.15),transparent),
+        radial-gradient(2px 2px at 60% 70%,rgba(255,255,255,0.1),transparent),
+        radial-gradient(1px 1px at 50% 50%,rgba(255,255,255,0.2),transparent),
+        radial-gradient(1px 1px at 80% 10%,rgba(255,255,255,0.15),transparent),
+        radial-gradient(2px 2px at 90% 60%,rgba(255,255,255,0.1),transparent);
+    background-size:200% 200%;
+    background-position:0% 0%,100% 0%,50% 100%,0% 50%,100% 100%;
+    animation:sparkle 15s ease infinite;
+    pointer-events:none;
+    z-index:0;
+}
+@keyframes sparkle{
+    0%,100%{opacity:1;transform:scale(1);}
+    50%{opacity:0.8;transform:scale(1.1);}
+}
+.shell{display:flex;height:100vh;position:relative;z-index:1;}
+
+/* SIDEBAR */
+.sidebar{
+    width:300px;
+    background:rgba(2,6,23,0.85);
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+    color:#e5e7eb;
+    display:flex;flex-direction:column;
+    border-right:1px solid rgba(255,255,255,0.1);
+    box-shadow:4px 0 24px rgba(0,0,0,0.3);
+}
+.sidebar-header{
+    padding:12px 24px;
+    border-bottom:1px solid rgba(255,255,255,0.1);
+    background:rgba(15,23,42,0.3);
+}
+.logo-row{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:8px;
+}
+.logo-icon{
+    width:48px;
+    height:48px;
+    border-radius:16px;
+    background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:24px;
+    color:white;
+    font-weight:800;
+    box-shadow:0 8px 24px rgba(102,126,234,0.4);
+    animation:glow 3s ease-in-out infinite;
+}
+@keyframes glow{
+    0%,100%{box-shadow:0 8px 24px rgba(102,126,234,0.4);}
+    50%{box-shadow:0 8px 32px rgba(102,126,234,0.7);}
+}
+.logo-text h1{
+    font-size:22px;
+    font-weight:700;
+    background:linear-gradient(135deg,#fff,#e0e7ff);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    background-clip:text;
+}
+.logo-text p{font-size:13px;color:#9ca3af;margin-top:2px;}
+
+.new-chat-btn{
+    width:100%;
+    padding:14px;
+    border-radius:12px;
+    margin-top:8px;
+    background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+    color:white;
+    border:none;
+    font-weight:600;
+    cursor:pointer;
+    font-size:14px;
+    transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+    box-shadow:0 4px 16px rgba(102,126,234,0.3);
+}
+.new-chat-btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 8px 24px rgba(102,126,234,0.5);
+}
+.new-chat-btn:active{transform:translateY(0);}
+
+.sidebar-menu{
+    flex:1;
+    padding:20px;
+    overflow-y:auto;
+}
+.sidebar-menu::-webkit-scrollbar{width:6px;}
+.sidebar-menu::-webkit-scrollbar-track{background:transparent;}
+.sidebar-menu::-webkit-scrollbar-thumb{
+    background:rgba(255,255,255,0.2);
+    border-radius:10px;
+}
+.menu-title{
+    font-size:11px;
+    color:#6b7280;
+    margin-bottom:14px;
+    text-transform:uppercase;
+    letter-spacing:1.2px;
+    font-weight:600;
+}
+.menu-item{
+    padding:14px;
+    border-radius:12px;
+    display:flex;
+    gap:14px;
+    margin-bottom:10px;
+    background:rgba(15,23,42,0.5);
+    cursor:pointer;
+    transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+    border:1px solid transparent;
+}
+.menu-item:hover{
+    background:rgba(102,126,234,0.2);
+    border-color:rgba(102,126,234,0.3);
+    transform:translateX(4px);
+}
+.menu-item.active{
+    background:linear-gradient(135deg,rgba(102,126,234,0.8),rgba(118,75,162,0.8));
+    border-color:rgba(255,255,255,0.2);
+    box-shadow:0 4px 16px rgba(102,126,234,0.3);
+}
+.menu-icon{
+    width:40px;
+    height:40px;
+    background:rgba(30,41,59,0.6);
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:18px;
+    transition:all 0.3s;
+}
+.menu-item:hover .menu-icon{
+    background:rgba(102,126,234,0.3);
+    transform:scale(1.1);
+}
+.menu-label span:first-child{
+    font-size:15px;
+    font-weight:600;
+    display:block;
+    margin-bottom:2px;
+}
+.menu-label span:last-child{
+    font-size:12px;
+    color:#94a3b8;
+}
+
+.sidebar-footer{
+    padding:20px;
+    border-top:1px solid rgba(255,255,255,0.1);
+    font-size:12px;
+    background:rgba(15,23,42,0.3);
+}
+.footer-row{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:10px;
+    align-items:center;
+}
+.pill{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:rgba(15,23,42,0.6);
+    padding:8px 14px;
+    border-radius:999px;
+    border:1px solid rgba(34,197,94,0.3);
+}
+.pill-dot{
+    width:10px;
+    height:10px;
+    background:#22c55e;
+    border-radius:999px;
+    box-shadow:0 0 8px rgba(34,197,94,0.6);
+    animation:pulse 2s ease-in-out infinite;
+}
+
+/* MAIN AREA */
+.main{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    background:rgba(255,255,255,0.05);
+    backdrop-filter:blur(10px);
+}
+.topbar{
+    background:rgba(255,255,255,0.1);
+    backdrop-filter:blur(20px);
+    height:72px;
+    padding:0 32px;
+    border-bottom:1px solid rgba(255,255,255,0.1);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    box-shadow:0 2px 16px rgba(0,0,0,0.1);
+}
+.topbar h2{
+    font-size:24px;
+    font-weight:700;
+    background:linear-gradient(135deg,#fff,#e0e7ff);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    background-clip:text;
+    margin-bottom:2px;
+}
+.topbar div>div{
+    font-size:13px;
+    color:rgba(255,255,255,0.7);
+}
+.listen-btn{
+    padding:12px 24px;
+    border-radius:999px;
+    border:2px solid rgba(255,255,255,0.2);
+    background:rgba(255,255,255,0.1);
+    backdrop-filter:blur(10px);
+    color:#fff;
+    cursor:pointer;
+    display:flex;
+    gap:8px;
+    align-items:center;
+    font-weight:600;
+    font-size:14px;
+    transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+    box-shadow:0 4px 16px rgba(0,0,0,0.2);
+}
+.listen-btn:hover{
+    background:rgba(255,255,255,0.15);
+    transform:translateY(-2px);
+    box-shadow:0 6px 20px rgba(0,0,0,0.3);
+}
+.listen-btn.active{
+    background:linear-gradient(135deg,#ef4444,#dc2626);
+    border-color:rgba(255,255,255,0.3);
+    box-shadow:0 4px 20px rgba(239,68,68,0.5);
+    animation:pulse 2s ease-in-out infinite;
+}
+
+.content{
+    flex:1;
+    overflow-y:auto;
+    padding:32px 40px;
+    position:relative;
+}
+.content::-webkit-scrollbar{width:8px;}
+.content::-webkit-scrollbar-track{background:transparent;}
+.content::-webkit-scrollbar-thumb{
+    background:rgba(255,255,255,0.2);
+    border-radius:10px;
+}
+
+/* COMPETITION BADGES SECTION */
+.competition-section{
+    max-width:900px;
+    margin:0 auto 24px;
+    display:flex;
+    gap:16px;
+    flex-wrap:wrap;
+    justify-content:center;
+    animation:fadeInUp 0.8s ease-out;
+}
+.badge-item{
+    flex:1;
+    min-width:180px;
+    background:rgba(255,255,255,0.1);
+    backdrop-filter:blur(15px);
+    padding:16px 20px;
+    border-radius:16px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    border:1px solid rgba(255,255,255,0.15);
+    transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+    box-shadow:0 4px 20px rgba(0,0,0,0.2);
+}
+.badge-item:hover{
+    transform:translateY(-4px) scale(1.02);
+    background:rgba(255,255,255,0.2);
+    box-shadow:0 12px 40px rgba(0,0,0,0.4), 0 0 20px rgba(102,126,234,0.3);
+    border-color:rgba(255,255,255,0.3);
+}
+.badge-item:hover .badge-icon{
+    transform:scale(1.1) rotate(5deg);
+}
+.badge-icon{
+    transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.badge-icon{
+    font-size:32px;
+    width:48px;
+    height:48px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(255,255,255,0.1);
+    border-radius:12px;
+    flex-shrink:0;
+}
+.badge-text{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+}
+.badge-text strong{
+    font-size:14px;
+    font-weight:700;
+    color:#fff;
+    line-height:1.2;
+}
+.badge-text span{
+    font-size:12px;
+    color:rgba(255,255,255,0.7);
+}
+
+/* TECH STACK */
+.tech-stack{
+    display:flex;
+    gap:12px;
+    margin-top:20px;
+    flex-wrap:wrap;
+}
+.tech-item{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:10px 16px;
+    background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(10px);
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,0.1);
+    cursor:pointer;
+    transition:all 0.3s;
+    font-size:13px;
+    font-weight:600;
+    color:rgba(255,255,255,0.9);
+}
+.tech-item:hover{
+    background:rgba(255,255,255,0.15);
+    transform:translateY(-2px);
+    border-color:rgba(255,255,255,0.2);
+}
+.tech-item svg{
+    width:20px;
+    height:20px;
+    stroke:rgba(255,255,255,0.9);
+}
+.tech-item span{
+    font-weight:600;
+}
+
+/* WELCOME CARD */
+.welcome-card{
+    background:rgba(255,255,255,0.1);
+    backdrop-filter:blur(20px);
+    padding:40px;
+    border-radius:24px;
+    max-width:900px;
+    margin:auto;
+    margin-bottom:32px;
+    display:flex;
+    gap:32px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.3);
+    border:1px solid rgba(255,255,255,0.2);
+    animation:fadeInUp 0.6s ease-out 0.2s both;
+}
+@keyframes fadeInUp{
+    from{
+        opacity:0;
+        transform:translateY(20px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+.welcome-avatar{
+    width:80px;
+    height:80px;
+    border-radius:20px;
+    background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:white;
+    font-size:40px;
+    font-weight:800;
+    margin-bottom:16px;
+    box-shadow:0 12px 32px rgba(102,126,234,0.4);
+    animation:float 3s ease-in-out infinite;
+}
+.welcome-card h1{
+    font-size:32px;
+    font-weight:800;
+    color:#fff;
+    margin-bottom:8px;
+}
+.welcome-card p{
+    font-size:16px;
+    color:rgba(255,255,255,0.8);
+}
+.suggest-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    margin-top:8px;
+}
+.chip{
+    padding:12px 20px;
+    border-radius:999px;
+    background:rgba(255,255,255,0.1);
+    backdrop-filter:blur(10px);
+    border:1px solid rgba(255,255,255,0.2);
+    cursor:pointer;
+    color:#fff;
+    font-weight:500;
+    font-size:14px;
+    transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+    box-shadow:0 4px 12px rgba(0,0,0,0.2);
+}
+.chip:hover{
+    background:rgba(255,255,255,0.2);
+    transform:translateY(-2px) scale(1.05);
+    box-shadow:0 6px 20px rgba(0,0,0,0.3);
+}
+.chip:active{
+    transform:translateY(0) scale(1);
+}
+
+/* CHAT BUBBLES */
+.chat-msg{
+    display:flex;
+    margin-bottom:20px;
+    animation:fadeIn 0.4s ease-out;
+}
+@keyframes fadeIn{
+    from{opacity:0;transform:translateY(10px);}
+    to{opacity:1;transform:translateY(0);}
+}
+.chat-left{justify-content:flex-start;}
+.chat-right{justify-content:flex-end;}
+
+.bubble-left{
+    max-width:75%;
+    background:rgba(255,255,255,0.15);
+    backdrop-filter:blur(10px);
+    color:#fff;
+    padding:16px 20px;
+    border-radius:20px 20px 20px 6px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.2);
+    border:1px solid rgba(255,255,255,0.1);
+    line-height:1.6;
+    font-size:15px;
+    transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+    word-wrap:break-word;
+}
+.bubble-left:not(.bubble-empty):hover{
+    transform:translateX(4px);
+    box-shadow:0 12px 32px rgba(0,0,0,0.3);
+    background:rgba(255,255,255,0.2);
+}
+.bubble-right{
+    max-width:75%;
+    background:linear-gradient(135deg,rgba(102,126,234,0.9),rgba(118,75,162,0.9));
+    color:white;
+    padding:16px 20px;
+    border-radius:20px 20px 6px 20px;
+    box-shadow:0 8px 24px rgba(102,126,234,0.4);
+    border:1px solid rgba(255,255,255,0.2);
+    line-height:1.6;
+    font-size:15px;
+    font-weight:500;
+    transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+    word-wrap:break-word;
+}
+.bubble-right:not(.bubble-empty):hover{
+    transform:translateX(-4px);
+    box-shadow:0 12px 32px rgba(102,126,234,0.6);
+}
+.bubble-empty{
+    color:rgba(255,255,255,0.5);
+    font-style:italic;
+    font-weight:400;
+}
+
+/* STOP VOICE BUTTON */
+#stopVoiceBtn{
+    position:fixed;
+    right:32px;
+    bottom:100px;
+    padding:14px 24px;
+    border-radius:999px;
+    background:linear-gradient(135deg,#ef4444,#dc2626);
+    color:white;
+    border:none;
+    cursor:pointer;
+    display:none;
+    z-index:9999;
+    box-shadow:0 8px 24px rgba(239,68,68,0.5);
+    font-weight:600;
+    font-size:14px;
+    transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+    backdrop-filter:blur(10px);
+}
+#stopVoiceBtn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 12px 32px rgba(239,68,68,0.6);
+}
+#stopVoiceBtn:active{transform:translateY(0);}
+
+/* STATUS BADGE */
+#statusBadge{
+    position:fixed;
+    left:340px;
+    bottom:32px;
+    background:rgba(15,23,42,0.95);
+    backdrop-filter:blur(30px);
+    padding:14px 24px;
+    border-radius:999px;
+    display:none;
+    align-items:center;
+    gap:12px;
+    box-shadow:0 8px 32px rgba(0,0,0,0.5), 0 0 0 2px rgba(102,126,234,0.5);
+    border:2px solid rgba(102,126,234,0.6);
+    color:#fff;
+    font-weight:600;
+    font-size:15px;
+    animation:slideUp 0.3s ease-out;
+    z-index:10000;
+    min-width:160px;
+    justify-content:center;
+}
+@keyframes slideUp{
+    from{
+        opacity:0;
+        transform:translateY(20px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+.status-dot{
+    width:14px;
+    height:14px;
+    background:#ef4444;
+    border-radius:999px;
+    animation:pulse 1.5s infinite;
+    box-shadow:0 0 16px rgba(239,68,68,1), 0 0 8px rgba(239,68,68,0.6);
+}
+.spinner{
+    width:18px;
+    height:18px;
+    border-radius:999px;
+    border:3px solid rgba(102,126,234,0.3);
+    border-top-color:#667eea;
+    animation:spin 0.7s linear infinite;
+    box-shadow:0 0 12px rgba(102,126,234,0.5);
+}
+@keyframes pulse{
+    0%,100%{
+        opacity:1;
+        transform:scale(1);
+    }
+    50%{
+        opacity:0.7;
+        transform:scale(1.1);
+    }
+}
+@keyframes spin{
+    to{transform:rotate(360deg);}
+}
+
+/* Modules placeholder (empty) */
+.modules-chart{width:240px;margin-left:auto;display:flex;justify-content:center;align-items:center;position:relative;}
+.modules-placeholder{width:220px;height:220px;border-radius:16px;background:transparent;border-radius:16px;display:block;}
+</style>
+<!-- Using SVG-based radial wheel instead of Chart.js -->
+</head>
+
+<body>
+
+<div class="shell">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+    <div class="sidebar-header">
+        <div class="logo-row">
+            <div class="logo-icon">M</div>
+            <div class="logo-text">
+                <h1>MICRO</h1>
+                <p>Voice AI Assistant</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar-menu">
+        <div class="menu-title">ASSISTANT MODES</div>
+
+        <div class="menu-item active">
+            <div class="menu-icon">🎙️</div>
+            <div class="menu-label">
+                <span>Wake Word</span>
+                <span>Say "MICRO"</span>
+            </div>
+        </div>
+
+        <div class="menu-item" onclick="goDetect()">
+            <div class="menu-icon">📸</div>
+            <div class="menu-label">
+                <span>Object Detection</span>
+                <span>FPGA YOLO → Voice</span>
+            </div>
+        </div>
+
+        <div class="menu-item" onclick="goOCR()">
+            <div class="menu-icon">📷</div>
+            <div class="menu-label">
+                <span>OCR Scanner</span>
+                <span>Camera → Text & Voice</span>
+            </div>
+        </div>
+
+        <div class="menu-item" onclick="goLocation()">
+            <div class="menu-icon">📍</div>
+            <div class="menu-label">
+                <span>Location Tracker</span>
+                <span>Real-time GPS</span>
+            </div>
+        </div>
+
+        <div class="menu-item" onclick="goMental()">
+            <div class="menu-icon">🧠</div>
+            <div class="menu-label">
+                <span>Mental Health</span>
+                <span>Voice → Emotion Analysis</span>
+            </div>
+        </div>
+
+        <div class="menu-item" onclick="goMedical()">
+            <div class="menu-icon">💊</div>
+            <div class="menu-label">
+                <span>Medical Assistance</span>
+                <span>Voice → Health Wellness</span>
+            </div>
+        </div>
+
+        <div class="menu-item" onclick="goDiary()">
+            <div class="menu-icon">📖</div>
+            <div class="menu-label">
+                <span>AI Diary</span>
+                <span>Voice → Personal Journal</span>
+            </div>
+        </div>
+
+        <div class="menu-item" onclick="goParental()">
+            <div class="menu-icon">👨‍👩‍👧</div>
+            <div class="menu-label">
+                <span>Parental Mode</span>
+                <span>Voice → Usage Analytics</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar-footer">
+        <div class="footer-row">
+            <div class="pill"><div class="pill-dot"></div>Voice Active</div>
+            <span style="padding:6px 12px;background:rgba(255,215,0,0.2);border-radius:6px;font-size:11px;font-weight:600;color:#ffd700;">🏆 Competition Ready</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+            <span style="font-size:11px;color:rgba(255,255,255,0.7);">Model: Gemini Flash</span>
+            <span style="font-size:11px;color:rgba(255,255,255,0.7);">⚡ FPGA + AI</span>
+        </div>
+    </div>
+</aside>
+
+
+<!-- MAIN AREA -->
+<main class="main">
+
+    <div class="topbar">
+        <div>
+            <h2>MICRO Voice Assistant</h2>
+            <div style="font-size:13px;color:#6b7280;">Say "MICRO" to start</div>
+        </div>
+
+        <button id="listenBtn" class="listen-btn" onclick="toggleListening()">
+            🎤 <span id="listenLabel">Start Listening</span>
+        </button>
+    </div>
+
+    <div class="content">
+
+        <!-- COMPETITION BADGES SECTION -->
+        <div id="competitionBadges" class="competition-section">
+            <div class="badge-item">
+                <div class="badge-icon">🏆</div>
+                <div class="badge-text">
+                    <strong>AI-Powered</strong>
+                    <span>Gemini Integration</span>
+                </div>
+            </div>
+            <div class="badge-item">
+                <div class="badge-icon">⚡</div>
+                <div class="badge-text">
+                    <strong>FPGA Accelerated</strong>
+                    <span>Real-time Processing</span>
+                </div>
+            </div>
+            <div class="badge-item">
+                <div class="badge-icon">🎯</div>
+                <div class="badge-text">
+                    <strong>Multi-Modal</strong>
+                    <span>Voice + Vision</span>
+                </div>
+            </div>
+            <div class="badge-item">
+                <div class="badge-icon">🚀</div>
+                <div class="badge-text">
+                    <strong>Production Ready</strong>
+                    <span>Enterprise Grade</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- WELCOME CARD -->
+        <div id="welcomeCard" class="welcome-card">
+            <div>
+                <div class="welcome-avatar">M</div>
+                <h1>Welcome to MICRO</h1>
+                <p>Your AI-Powered Voice Assistant with Vision</p>
+                
+                <!-- TECH STACK LOGOS -->
+                <div class="tech-stack">
+                    <div class="tech-item" title="Google Gemini AI">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                        </svg>
+                        <span>Gemini</span>
+                    </div>
+                    <div class="tech-item" title="FPGA Acceleration">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            <path d="M9 9h6v6H9z"/>
+                        </svg>
+                        <span>FPGA</span>
+                    </div>
+                    <div class="tech-item" title="OpenCV Vision">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"/>
+                        </svg>
+                        <span>OpenCV</span>
+                    </div>
+                    <div class="tech-item" title="Tesseract OCR">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="5" width="18" height="14" rx="2"/>
+                            <path d="M7 9h10M7 12h8M7 15h6"/>
+                        </svg>
+                        <span>OCR</span>
+                    </div>
+                    <div class="tech-item" title="YOLO Object Detection">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"/>
+                            <rect x="14" y="3" width="7" height="7"/>
+                            <rect x="3" y="14" width="7" height="7"/>
+                            <rect x="14" y="14" width="7" height="7"/>
+                        </svg>
+                        <span>YOLO</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="welcome-right" style="display:flex;align-items:center;gap:16px;">
+                <div style="flex:1;">
+                    <!-- Left side intentionally left empty to focus on the modules chart -->
+                </div>
+                <div class="modules-chart" aria-hidden="true">
+                    <div class="modules-placeholder" aria-hidden="true" title="Modules area"></div>
+                </div>   
+            </div> 
+        </div>
+
+        <!-- CHAT MESSAGES -->
+        <div style="max-width:900px;margin:auto;">
+            
+            <div class="chat-msg chat-right">
+                <div id="transcript" class="bubble-right bubble-empty">
+                    Your spoken question will appear here…
+                </div>
+            </div>
+
+            <div class="chat-msg chat-left">
+                <div id="reply" class="bubble-left bubble-empty">
+                    MICRO's reply will appear here…
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</main>
+</div>
+
+<button id="stopVoiceBtn" onclick="stopSpeech()">⏹ Stop Voice</button>
+
+<div id="statusBadge">
+    <div id="statusIcon" class="status-dot"></div>
+    <span id="statusText">Listening…</span>
+</div>
+
+<script>
+let last_seq = 0;
+let isListening = false;
+let speaking = false;
+let lastStartTime = null;
+// Voice navigation: saying module names will navigate to their pages
+let allowVoiceNavigation = true; // voice-based navigation enabled
+
+
+window.addEventListener("load", () => {
+    fetch("/get_latest")
+        .then(r => r.json())
+        .then(d => {
+            last_seq = d.seq;
+        })
+        .catch(err => console.log(err));
+});
+
+function goOCR(){
+    window.location.href = "/ocr";
+}
+function goDetect(){
+    window.location.href = "/detect";
+}
+function goDiary(){
+    window.location.href = "/diary";
+}
+function goMedical(){
+    window.location.href = "/medical";
+}
+function goMental(){
+    window.location.href = "/mental";
+}
+function goParental(){
+    window.location.href = "/parental";
+}
+function goLocation(){
+    window.location.href = "/location";
+}
+
+function toggleListening(){
+    const btn = document.getElementById("listenBtn");
+    const label = document.getElementById("listenLabel");
+    const badge = document.getElementById("statusBadge");
+    const icon  = document.getElementById("statusIcon");
+    const text  = document.getElementById("statusText");
+
+    if(!isListening){
+        // Capture start time
+        const now = new Date();
+        lastStartTime = now.getHours().toString().padStart(2,'0') + ':' + 
+                       now.getMinutes().toString().padStart(2,'0') + ':' + 
+                       now.getSeconds().toString().padStart(2,'0');
+        
+        fetch("/start");
+        isListening = true;
+        btn.classList.add("active");
+        label.textContent = "Stop Listening";
+
+        icon.className = "status-dot";
+        text.textContent = "Listening…";
+        badge.style.display = "flex";
+
+    } else {
+        fetch("/stop");
+        isListening = false;
+        btn.classList.remove("active");
+        label.textContent = "Start Listening";
+
+        icon.className = "spinner";
+        text.textContent = "Processing…";
+        badge.style.display = "flex";
+
+        // Log activity
+        if(lastStartTime){
+            const now = new Date();
+            const endTime = now.getHours().toString().padStart(2,'0') + ':' + 
+                           now.getMinutes().toString().padStart(2,'0') + ':' + 
+                           now.getSeconds().toString().padStart(2,'0');
+            
+            fetch("/log_activity", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    module: "chat",
+                    start_time: lastStartTime,
+                    end_time: endTime
+                })
+            }).catch(err => console.log("Activity log error:", err));
+        }
+    }
+}
+
+function stopSpeech(){
+    speechSynthesis.cancel();
+    speaking = false;
+    document.getElementById("stopVoiceBtn").style.display = "none";
+}
+
+function speak(text){
+    if(!text) return;
+    speechSynthesis.cancel();
+
+    const u = new SpeechSynthesisUtterance(text);
+
+    u.onstart = () => {
+        speaking = true;
+        document.getElementById("stopVoiceBtn").style.display = "block";
+    };
+    u.onend = () => {
+        speaking = false;
+        document.getElementById("stopVoiceBtn").style.display = "none";
+    };
+
+    speechSynthesis.speak(u);
+}
+
+function newChat(){
+    last_seq = 0;
+    document.getElementById("welcomeCard").style.display = "flex";
+    document.getElementById("transcript").textContent = "Your spoken question will appear here…";
+    document.getElementById("transcript").className = "bubble-right bubble-empty";
+    document.getElementById("reply").textContent = "MICRO's reply will appear here…";
+    document.getElementById("reply").className = "bubble-left bubble-empty";
+}
+
+function useSuggestion(text){
+    document.getElementById("transcript").textContent = text;
+    document.getElementById("transcript").className = "bubble-right";
+}
+
+function poll(){
+    fetch("/get_latest")
+    .then(r => r.json())
+    .then(d => {
+        if(d.seq > last_seq){
+            last_seq = d.seq;
+
+            document.getElementById("welcomeCard").style.display = "none";
+
+            const t = document.getElementById("transcript");
+            const r = document.getElementById("reply");
+
+            if(d.transcript){
+                t.textContent = d.transcript;
+                t.className = "bubble-right";
+            }
+
+            if(d.reply){
+                r.textContent = d.reply;
+                r.className = "bubble-left";
+
+                const transcriptLower = (d.transcript || "").toLowerCase();
+                const replyLower = (d.reply || "").toLowerCase();
+
+                const wordMatch = (phrase, text) => {
+                    if (!phrase || !text) return false;
+                    // escape regex metacharacters, then match whole word boundaries
+                    const escaped = phrase.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&");
+                    const re = new RegExp("\\b" + escaped + "\\b", "i");
+                    return re.test(text);
+                };
+
+                // ---- OCR COMMANDS ----
+                if (allowVoiceNavigation && (
+                    transcriptLower.includes("ocr") ||
+                    transcriptLower.includes("scan text") ||
+                    transcriptLower.includes("text scan") ||
+                    transcriptLower.includes("read text") ||
+                    replyLower.includes("ocr") ||
+                    replyLower.includes("scan text") ||
+                    replyLower.includes("text scan") ||
+                    replyLower.includes("read text")
+                )) {
+                    window.location.href = "/ocr";
+                    return;
+                }
+
+                // ---- OBJECT DETECTION COMMANDS ----
+                if (allowVoiceNavigation && (
+                    transcriptLower.includes("object detection") ||
+                    transcriptLower.includes("detect objects") ||
+                    transcriptLower.includes("object detect") ||
+                    replyLower.includes("object detection") ||
+                    replyLower.includes("detect objects") ||
+                    replyLower.includes("object detect")
+                )) {
+                    window.location.href = "/detect";
+                    return;
+                }
+
+                // ---- LOCATION COMMANDS ----
+                if (allowVoiceNavigation && (
+                    transcriptLower.includes("open location") ||
+                    transcriptLower.includes("track location") ||
+                    transcriptLower.includes("location tracker") ||
+                    transcriptLower.includes("gps")
+                )) {
+                    window.location.href = "/location";
+                    return;
+                }
+
+                // ---- DIARY COMMANDS ----
+                if (allowVoiceNavigation && (
+                    transcriptLower.includes("open diary") ||
+                    transcriptLower.includes("diary") ||
+                    transcriptLower.includes("journal") ||
+                    transcriptLower.includes("write diary") ||
+                    replyLower.includes("diary") ||
+                    replyLower.includes("journal")
+                )) {
+                    window.location.href = "/diary";
+                    return;
+                }
+
+                // ---- MEDICAL COMMANDS ----
+                if (allowVoiceNavigation && (
+                    transcriptLower.includes("medical assistance") ||
+                    transcriptLower.includes("medical help") ||
+                    transcriptLower.includes("doctor") ||
+                    transcriptLower.includes("hospital")
+                )) {
+                    window.location.href = "/medical";
+                    return;
+                }
+
+                // ---- MENTAL HEALTH COMMANDS ----
+                if (allowVoiceNavigation && (
+                    transcriptLower.includes("mental health") ||
+                    transcriptLower.includes("mental checkup") ||
+                    transcriptLower.includes("mood check")
+                )) {
+                    window.location.href = "/mental";
+                    return;
+                }
+
+                // ---- PARENTAL MODE COMMANDS ----
+                if (allowVoiceNavigation && (
+                    transcriptLower.includes("parental mode") ||
+                    transcriptLower.includes("parental") ||
+                    transcriptLower.includes("usage") ||
+                    transcriptLower.includes("analytics") ||
+                    transcriptLower.includes("open parental") ||
+                    replyLower.includes("parental") ||
+                    replyLower.includes("analytics")
+                )) {
+                    window.location.href = "/parental";
+                    return;
+                }
+
+                speak(d.reply);
+            }
+
+            document.getElementById("statusBadge").style.display = "none";
+        }
+    })
+    .catch(err => console.log(err));
+}
+
+// Modules illustration (static) — interactive wheel removed per user request.
+// If you want this to be dynamic later, I can plug in an analytics-driven visual here.
+
+setInterval(poll,1000);
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1135 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>EDGE SIGHT - LOCATION TRACKER</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    height:100vh;
+    overflow:hidden;
+    background:
+        radial-gradient(circle at 20% 50%, rgba(120,119,198,0.15), transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(56,189,248,0.12), transparent 50%),
+        #020617;
+    color:#e5e7eb;
+    position:relative;
+}
+
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background-image:
+        linear-gradient(0deg,#11182733 1px,transparent 1px),
+        linear-gradient(90deg,#11182733 1px,transparent 1px);
+    background-size:40px 40px;
+    opacity:0.4;
+    z-index:0;
+}
+
+.wrapper{
+    width:95%;
+    max-width:1400px;
+    margin:20px auto;
+    position:relative;
+    z-index:1;
+    height:calc(100vh - 40px);
+    display:flex;
+    flex-direction:column;
+}
+
+.header{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+.header-title{
+    font-size:36px;
+    font-weight:700;
+    letter-spacing:0.08em;
+    color:#e5e7eb;
+    margin-bottom:8px;
+    text-shadow:0 0 20px rgba(139,92,246,0.3);
+}
+
+.header-sub{
+    font-size:14px;
+    color:#9ca3af;
+}
+
+.main-container{
+    display:grid;
+    grid-template-columns:350px 1fr;
+    gap:20px;
+    flex:1;
+    overflow:hidden;
+}
+
+.card{
+    padding:24px;
+    border-radius:20px;
+    background:rgba(15,23,42,0.9);
+    border:1px solid #1f2937;
+    box-shadow:0 18px 45px rgba(0,0,0,0.7);
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+}
+
+.card h2{
+    color:#a5b4fc;
+    margin-bottom:16px;
+    font-size:18px;
+    letter-spacing:0.16em;
+    font-weight:700;
+}
+
+/* CONTROL PANEL */
+.control-panel{
+    gap:16px;
+    overflow-y:auto;
+    overflow-x:hidden;
+}
+
+.control-panel::-webkit-scrollbar{
+    width:8px;
+}
+
+.control-panel::-webkit-scrollbar-track{
+    background:rgba(31,41,55,0.5);
+    border-radius:4px;
+}
+
+.control-panel::-webkit-scrollbar-thumb{
+    background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+    border-radius:4px;
+}
+
+.control-panel::-webkit-scrollbar-thumb:hover{
+    background:linear-gradient(135deg,#764ba2 0%,#667eea 100%);
+}
+
+.status-section{
+    background:rgba(15,23,42,0.5);
+    padding:20px;
+    border-radius:16px;
+    border:1px solid #0ea5e977;
+    box-shadow:0 0 25px rgba(8,47,73,0.8);
+    margin-bottom:16px;
+}
+
+.status-text{
+    font-size:13px;
+    color:#cbd5e1;
+    margin-bottom:8px;
+    line-height:1.6;
+}
+
+.status-tag{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:rgba(15,23,42,0.9);
+    border-radius:999px;
+    padding:6px 14px;
+    border:1px solid #22c55e;
+    color:#bbf7d0;
+    font-size:12px;
+    font-weight:600;
+    margin-top:8px;
+}
+
+.status-dot{
+    width:8px;
+    height:8px;
+    border-radius:999px;
+    background:#22c55e;
+    box-shadow:0 0 8px #22c55e;
+    animation:pulse 2s infinite;
+}
+
+.location-info{
+    background:rgba(15,23,42,0.5);
+    padding:16px;
+    border-radius:12px;
+    border:1px solid #374151;
+    margin-bottom:12px;
+}
+
+.info-row{
+    display:flex;
+    justify-content:space-between;
+    padding:8px 0;
+    border-bottom:1px solid rgba(255,255,255,0.05);
+}
+
+.info-row:last-child{
+    border-bottom:none;
+}
+
+.info-label{
+    font-size:12px;
+    color:#9ca3af;
+    font-weight:500;
+}
+
+.info-value{
+    font-size:13px;
+    color:#e5e7eb;
+    font-weight:600;
+    font-family:'Courier New',monospace;
+}
+
+.control-buttons{
+    display:flex;
+    gap:12px;
+    flex-direction:column;
+}
+
+.btn{
+    padding:14px 20px;
+    border-radius:12px;
+    border:none;
+    font-weight:600;
+    cursor:pointer;
+    font-size:14px;
+    transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+}
+
+.btn-primary{
+    background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+    color:white;
+    box-shadow:0 4px 16px rgba(102,126,234,0.3);
+}
+
+.btn-primary:hover:not(:disabled){
+    transform:translateY(-2px);
+    box-shadow:0 8px 24px rgba(102,126,234,0.5);
+}
+
+.btn-secondary{
+    background:linear-gradient(135deg,#10b981 0%,#059669 100%);
+    color:white;
+    box-shadow:0 4px 16px rgba(16,185,129,0.3);
+}
+
+.btn-secondary:hover:not(:disabled){
+    transform:translateY(-2px);
+    box-shadow:0 8px 24px rgba(16,185,129,0.5);
+}
+
+.btn-voice{
+    background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%);
+    color:white;
+    box-shadow:0 4px 16px rgba(245,158,11,0.3);
+}
+
+.btn-voice:hover:not(:disabled){
+    transform:translateY(-2px);
+    box-shadow:0 8px 24px rgba(245,158,11,0.5);
+}
+
+.btn-voice.recording{
+    background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);
+    animation:recordPulse 1s infinite;
+}
+
+@keyframes recordPulse{
+    0%, 100%{box-shadow:0 4px 16px rgba(239,68,68,0.6);}
+    50%{box-shadow:0 8px 32px rgba(239,68,68,0.9);}
+}
+
+.btn-exit{
+    background:linear-gradient(135deg,#06b6d4 0%,#0891b2 100%);
+    color:white;
+    box-shadow:0 4px 16px rgba(6,182,212,0.3);
+    margin-top:auto;
+}
+
+.btn-exit:hover:not(:disabled){
+    transform:translateY(-2px);
+    box-shadow:0 8px 24px rgba(6,182,212,0.5);
+}
+
+/* MAP PANEL */
+.map-panel{
+    position:relative;
+}
+
+#map{
+    width:100%;
+    height:100%;
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:0 8px 32px rgba(0,0,0,0.5);
+}
+
+.update-indicator{
+    position:absolute;
+    top:16px;
+    right:16px;
+    background:rgba(15,23,42,0.95);
+    padding:8px 16px;
+    border-radius:8px;
+    border:1px solid #22c55e;
+    font-size:12px;
+    color:#bbf7d0;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    z-index:1000;
+}
+
+.update-dot{
+    width:6px;
+    height:6px;
+    border-radius:999px;
+    background:#22c55e;
+    box-shadow:0 0 8px #22c55e;
+    animation:pulse 2s infinite;
+}
+
+.nav-instructions{
+    position:absolute;
+    bottom:16px;
+    left:16px;
+    right:16px;
+    background:rgba(15,23,42,0.95);
+    padding:16px;
+    border-radius:12px;
+    border:1px solid #22c55e;
+    color:#e5e7eb;
+    font-size:13px;
+    z-index:1000;
+    display:none;
+    max-height:200px;
+    overflow-y:auto;
+}
+
+.nav-instructions.show{
+    display:block;
+}
+
+.nav-instructions::-webkit-scrollbar{
+    width:6px;
+}
+
+.nav-instructions::-webkit-scrollbar-track{
+    background:rgba(31,41,55,0.5);
+    border-radius:3px;
+}
+
+.nav-instructions::-webkit-scrollbar-thumb{
+    background:#22c55e;
+    border-radius:3pxse 2s infinite;
+}
+
+.nav-instructions{
+    position:absolute;
+    bottom:16px;
+    left:16px;
+    right:16px;
+    background:rgba(15,23,42,0.95);
+    padding:16px;
+    border-radius:12px;
+    border:1px solid #22c55e;
+    color:#e5e7eb;
+    font-size:13px;
+    z-index:1000;
+    display:none;
+    max-height:200px;
+    overflow-y:auto;
+}
+
+.nav-instructions.show{
+    display:block;
+}
+
+/* Distance Labels on Map */
+.distance-label{
+    background:rgba(0,0,0,0.75);
+    padding:4px 8px;
+    border-radius:6px;
+    font-weight:bold;
+    color:white;
+    border:2px solid #00FFAB;
+    box-shadow:0 2px 8px rgba(0,0,0,0.5);
+}
+
+/* ANIMATIONS */
+@keyframes pulse{
+    0%, 100%{opacity:1;}
+    50%{opacity:0.5;}
+}
+
+@keyframes fadeInUp{
+    from{
+        opacity:0;
+        transform:translateY(20px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+.card{
+    animation:fadeInUp 0.5s ease-out;
+}
+
+@media(max-width:1000px){
+    .main-container{
+        grid-template-columns:1fr;
+        grid-template-rows:auto 1fr;
+    }
+}
+
+@media(max-width:600px){
+    .header-title{
+        font-size:24px;
+    }
+    .wrapper{
+        width:98%;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrapper">
+    <div class="header">
+        <div class="header-title">ðŸ“ LOCATION TRACKER</div>
+        <div class="header-sub">Real-time GPS Position Monitoring</div>
+    </div>
+
+    <div class="main-container">
+        <!-- CONTROL PANEL -->
+        <div class="card control-panel">
+            <h2>ðŸ›°ï¸ GPS STATUS</h2>
+
+            <div class="status-section">
+                <div class="status-text">
+                    <strong>System Status:</strong>
+                    <div class="status-tag">
+                        <span class="status-dot"></span>
+                        <span id="systemStatus">Initializing...</span>
+                    </div>
+                </div>
+            </div>
+
+            <h2>ðŸ“Š LOCATION DATA</h2>
+            
+            <div class="location-info">
+                <div class="info-row">
+                    <span class="info-label">Source</span>
+                    <span class="info-value" id="source">Pune, Maharashtra</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Destination</span>
+                    <span class="info-value" id="destination">--</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Accuracy</span>
+                    <span class="info-value" id="accuracy">--</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Altitude</span>
+                    <span class="info-value" id="altitude">--</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Speed</span>
+                    <span class="info-value" id="speed">--</span>
+                </div>
+            </div>
+
+            <div class="location-info">
+                <div class="info-row">
+                    <span class="info-label">Last Update</span>
+                    <span class="info-value" id="lastUpdate">Never</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Update Count</span>
+                    <span class="info-value" id="updateCount">0</span>
+                </div>
+            </div>
+
+            <h2>🗺️ NAVIGATION INFO</h2>
+            
+            <div class="location-info" id="navInfoSection" style="display:none;">
+                <div class="info-row">
+                    <span class="info-label">Destination</span>
+                    <span class="info-value" id="destination" style="font-size:11px;">--</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Distance</span>
+                    <span class="info-value" id="distance">--</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Duration</span>
+                    <span class="info-value" id="duration">--</span>
+                </div>
+            </div>
+
+            <h2 id="voiceTranscriptHeader" style="display:none;">🔊 VOICE GUIDANCE</h2>
+            
+            <div class="location-info" id="voiceTranscriptBox" style="display:none;">
+                <div style="padding:12px;background:rgba(15,23,42,0.5);border-radius:8px;max-height:200px;overflow-y:auto;">
+                    <p id="voiceTranscriptText" style="font-size:12px;line-height:1.6;color:#cbd5e1;margin:0;"></p>
+                </div>
+            </div>
+
+            <div class="control-buttons">
+                <button class="btn btn-primary" onclick="centerMap()">
+                    🎯 Center on Current Location
+                </button>
+                <button class="btn btn-secondary" onclick="refreshLocation()">
+                    ðŸ”„ Refresh Location Now
+                </button>
+                <button class="btn btn-voice" id="voiceBtn" onclick="startVoiceNavigation()">
+                    🎤 <span id="voiceStatus">Voice Navigation</span>
+                </button>
+                <button class="btn btn-exit" onclick="exitLocation()">
+                    † Back to Home
+                </button>
+            </div>
+        </div>
+
+        <!-- MAP PANEL -->
+        <div class="card map-panel">
+            <div class="nav-instructions" id="navInstructions"></div>
+            <div id="map"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+let map = null;
+let marker = null;
+let updateCount = 0;
+let watchId = null;
+let currentLat = 0;
+let currentLng = 0;
+
+// ===== INITIALIZE GOOGLE MAP =====
+function initMap(){
+    // Default center (will be updated with actual location)
+    const defaultCenter = {lat: 20.5937, lng: 78.9629}; // Center of India as default
+    
+    map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 15,
+        center: defaultCenter,
+        mapTypeId: 'hybrid', // satellite view with labels
+        styles: [
+            {
+                featureType: "all",
+                elementType: "labels",
+                stylers: [{visibility: "on"}]
+            }
+        ],
+        mapTypeControl: true,
+        mapTypeControlOptions: {
+            style: google.maps.MapTypeControlStyle.DROPDOWN_MENU,
+            position: google.maps.ControlPosition.TOP_RIGHT
+        },
+        zoomControl: true,
+        streetViewControl: true,
+        fullscreenControl: true
+    });
+
+    // Create marker
+    marker = new google.maps.Marker({
+        map: map,
+        position: defaultCenter,
+        title: "Your Location",
+        animation: google.maps.Animation.DROP,
+        icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 10,
+            fillColor: "#4F46E5",
+            fillOpacity: 1,
+            strokeColor: "#ffffff",
+            strokeWeight: 3
+        }
+    });
+
+    // Add accuracy circle
+    window.accuracyCircle = new google.maps.Circle({
+        map: map,
+        center: defaultCenter,
+        radius: 100,
+        fillColor: "#4F46E5",
+        fillOpacity: 0.15,
+        strokeColor: "#4F46E5",
+        strokeOpacity: 0.4,
+        strokeWeight: 2
+    });
+
+    // Start watching location using browser geolocation
+    startLocationTracking();
+}
+
+// ===== START LIVE LOCATION TRACKING =====
+function startLocationTracking(){
+    // Set static location coordinates
+    const staticPosition = {
+        coords: {
+            latitude: 18.5326,
+            longitude: 73.8296,
+            accuracy: 10,
+            altitude: null,
+            speed: null
+        }
+    };
+    
+    // Update location with static coordinates
+    updateLocation(staticPosition);
+    
+    document.getElementById('systemStatus').textContent = 'Static Location Set';
+}
+
+// ===== UPDATE LOCATION FROM BROWSER GEOLOCATION =====
+function updateLocation(position){
+    updateCount++;
+    currentLat = position.coords.latitude;
+    currentLng = position.coords.longitude;
+
+    // Update map marker
+    const location = {lat: currentLat, lng: currentLng};
+    marker.setPosition(location);
+    
+    // Update accuracy circle
+    if(window.accuracyCircle && position.coords.accuracy){
+        window.accuracyCircle.setCenter(location);
+        window.accuracyCircle.setRadius(position.coords.accuracy);
+    }
+
+    // Update info display
+    // Source is static (Pune, Maharashtra), destination is set when navigation is used
+    document.getElementById('accuracy').textContent = position.coords.accuracy ? position.coords.accuracy.toFixed(1) + ' m' : '--';
+    document.getElementById('altitude').textContent = position.coords.altitude !== null ? position.coords.altitude.toFixed(1) + ' m' : '--';
+    document.getElementById('speed').textContent = position.coords.speed !== null ? (position.coords.speed * 3.6).toFixed(1) + ' km/h' : '0.0 km/h';
+    document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+    document.getElementById('updateCount').textContent = updateCount;
+    document.getElementById('systemStatus').textContent = 'GPS Active';
+
+    // Auto-center on first update
+    if(updateCount === 1){
+        map.setCenter(location);
+        map.setZoom(17);
+    }
+}
+
+// ===== HANDLE GEOLOCATION ERRORS =====
+function handleLocationError(error){
+    let message = 'GPS Error';
+    switch(error.code) {
+        case error.PERMISSION_DENIED:
+            message = 'Permission Denied';
+            console.error('Location permission denied by user');
+            break;
+        case error.POSITION_UNAVAILABLE:
+            message = 'Position Unavailable';
+            console.error('Location information unavailable');
+            break;
+        case error.TIMEOUT:
+            message = 'Request Timeout';
+            console.error('Location request timed out');
+            break;
+        default:
+            console.error('Unknown location error:', error);
+    }
+    document.getElementById('systemStatus').textContent = message;
+}
+
+// ===== CENTER MAP ON CURRENT LOCATION =====
+function centerMap(){
+    if(currentLat !== 0 && currentLng !== 0){
+        const position = {lat: currentLat, lng: currentLng};
+        map.setCenter(position);
+        map.setZoom(17);
+        marker.setAnimation(google.maps.Animation.BOUNCE);
+        setTimeout(() => marker.setAnimation(null), 2000);
+    }
+}
+
+// ===== REFRESH LOCATION NOW =====
+function refreshLocation(){
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            updateLocation,
+            handleLocationError,
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+        const btn = event.target;
+        btn.textContent = '³ Refreshing...';
+        setTimeout(() => {
+            btn.innerHTML = 'ðŸ”„ Refresh Location Now';
+        }, 1000);
+    }
+}
+
+// ===== EXIT TO HOME =====
+function exitLocation(){
+    if(watchId){
+        navigator.geolocation.clearWatch(watchId);
+    }
+    window.location.href = '/';
+}
+
+// ===== CLEANUP ON PAGE UNLOAD =====
+window.addEventListener('beforeunload', () => {
+    if(watchId){
+        navigator.geolocation.clearWatch(watchId);
+    }
+});
+
+// ===== VOICE NAVIGATION SYSTEM =====
+let isRecordingVoice = false;
+let recordingTimeout = null;
+
+async function startVoiceNavigation(){
+    if(isRecordingVoice){
+        // Stop recording if already recording
+        stopVoiceRecording();
+        return;
+    }
+
+    const voiceBtn = document.getElementById('voiceBtn');
+    const voiceStatus = document.getElementById('voiceStatus');
+    
+    try {
+        // Start server-side recording
+        const startResponse = await fetch('/start_nav_recording');
+        const startData = await startResponse.json();
+        
+        if(startData.status === 'recording_started'){
+            isRecordingVoice = true;
+            voiceBtn.classList.add('recording');
+            voiceStatus.textContent = 'Recording (5s)...';
+            
+            // Auto-stop after 5 seconds
+            recordingTimeout = setTimeout(() => {
+                stopVoiceRecording();
+            }, 5000);
+        } else {
+            alert('Failed to start recording: ' + startData.status);
+        }
+    } catch(err){
+        console.error('Recording start error:', err);
+        alert('Failed to start recording. Check console for details.');
+        voiceStatus.textContent = 'Voice Navigation';
+    }
+}
+
+async function stopVoiceRecording(){
+    if(!isRecordingVoice){
+        return;
+    }
+    
+    const voiceBtn = document.getElementById('voiceBtn');
+    const voiceStatus = document.getElementById('voiceStatus');
+    
+    if(recordingTimeout){
+        clearTimeout(recordingTimeout);
+        recordingTimeout = null;
+    }
+    
+    voiceStatus.textContent = 'Processing...';
+    voiceBtn.classList.remove('recording');
+    isRecordingVoice = false;
+    
+    try {
+        // Stop recording and get navigation
+        const response = await fetch('/stop_nav_recording', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                lat: currentLat,
+                lng: currentLng
+            })
+        });
+
+        const data = await response.json();
+        
+        if(data.success){
+            // Check if this is a places query
+            if(data.is_places_query){
+                displayPlacesOnMap(data.query, data.places);
+                voiceStatus.textContent = 'Voice Navigation';
+            } else {
+                // Regular navigation route
+                displayNavigationInstructions(data.transcript, data.route, data.distance, data.duration);
+                if(data.polyline && data.steps){
+                    drawRouteOnMap(data.polyline, data.steps);
+                }
+                // Speak navigation instructions using browser TTS
+                speakNavigationInstructions(data.transcript, data.distance, data.duration, data.route);
+                voiceStatus.textContent = 'Voice Navigation';
+            }
+        } else {
+            alert('Navigation failed: ' + (data.error || 'Unknown error'));
+            voiceStatus.textContent = 'Voice Navigation';
+        }
+    } catch(err){
+        console.error('Navigation error:', err);
+        alert('Failed to get navigation. Check console for details.');
+        voiceStatus.textContent = 'Voice Navigation';
+    }
+}
+
+function displayNavigationInstructions(destination, route, distance, duration){
+    // Update navigation info section
+    document.getElementById('navInfoSection').style.display = 'block';
+    document.getElementById('destination').textContent = destination || '--';
+    document.getElementById('distance').textContent = distance || '--';
+    document.getElementById('duration').textContent = duration || '--';
+    
+    // Update route instructions on map
+    const navDiv = document.getElementById('navInstructions');
+    
+    let html = `<strong>¯ Destination:</strong> ${destination}<br><br>`;
+    html += `<strong>ðŸ“ Route Instructions:</strong><br>`;
+    html += route.replace(/\n/g, '<br>');
+    
+    navDiv.innerHTML = html;
+    navDiv.classList.add('show');
+    
+    // Auto hide after 45 seconds
+    setTimeout(() => {
+        navDiv.classList.remove('show');
+    }, 45000);
+}
+
+function playNavigationAudio(audioUrl){
+    const audio = new Audio(audioUrl);
+    audio.play().catch(err => console.error('Audio playback error:', err));
+}
+
+function speakNavigationInstructions(destination, distance, duration, routeText){
+    // Cancel any ongoing speech
+    speechSynthesis.cancel();
+    
+    // Create a concise summary for voice output
+    let spokenText = `Navigation to ${destination}. `;
+    spokenText += `Total distance is ${distance}. `;
+    spokenText += `Estimated travel time is ${duration}. `;
+    
+    // Extract only the step-by-step directions from route text
+    const lines = routeText.split('\n');
+    let directions = [];
+    let foundSteps = false;
+    
+    for(let line of lines){
+        if(line.includes('Step by step directions:')){
+            foundSteps = true;
+            continue;
+        }
+        if(foundSteps && line.trim() !== ''){
+            // Remove numbers and clean up the text
+            let cleanLine = line.replace(/^\d+\.\s*/, '').trim();
+            if(cleanLine && !cleanLine.includes('Route to') && !cleanLine.includes('Total distance') && !cleanLine.includes('Total duration')){
+                directions.push(cleanLine);
+            }
+        }
+    }
+    
+    // Add first few key directions
+    if(directions.length > 0){
+        spokenText += 'Here are the directions. ';
+        // Speak only first 5 steps to keep it concise
+        const maxSteps = Math.min(5, directions.length);
+        for(let i = 0; i < maxSteps; i++){
+            spokenText += `Step ${i + 1}. ${directions[i]}. `;
+        }
+        
+        if(directions.length > maxSteps){
+            spokenText += `And ${directions.length - maxSteps} more steps. `;
+        }
+        spokenText += 'Please check the map for complete route details.';
+    }
+    
+    // Display the transcript text in the box
+    const transcriptBox = document.getElementById('voiceTranscriptBox');
+    const transcriptHeader = document.getElementById('voiceTranscriptHeader');
+    const transcriptText = document.getElementById('voiceTranscriptText');
+    
+    transcriptBox.style.display = 'block';
+    transcriptHeader.style.display = 'block';
+    transcriptText.textContent = spokenText;
+    
+    // Create and speak the utterance
+    let speech = new SpeechSynthesisUtterance(spokenText);
+    speech.rate = 1.0;
+    speech.pitch = 1.0;
+    speech.volume = 1.0;
+    speech.lang = 'en-US';
+    
+    speech.onstart = () => {
+        console.log('Navigation speech started');
+    };
+    
+    speech.onend = () => {
+        console.log('Navigation speech completed');
+    };
+    
+    speech.onerror = (err) => {
+        console.error('Speech synthesis error:', err);
+    };
+    
+    speechSynthesis.speak(speech);
+}
+
+// --- Route drawing helpers ---
+let routePolyline = null;
+let routeMarkers = [];
+let distanceLabels = [];
+let placeMarkers = [];
+
+function clearRoute(){
+    if(routePolyline){
+        routePolyline.setMap(null);
+        routePolyline = null;
+    }
+    routeMarkers.forEach(m => m.setMap(null));
+    routeMarkers = [];
+    distanceLabels.forEach(label => label.setMap(null));
+    distanceLabels = [];
+    document.getElementById('navInstructions').classList.remove('show');
+}
+
+function displayPlacesOnMap(query, places){
+    try{
+        // Clear any existing route and places
+        clearRoute();
+        clearPlaceMarkers();
+        
+        if(!places || places.length === 0){
+            alert('No places found for: ' + query);
+            return;
+        }
+        
+        // Show info in navigation section
+        document.getElementById('navInfoSection').style.display = 'block';
+        document.getElementById('destination').textContent = query;
+        document.getElementById('distance').textContent = places.length + ' found';
+        document.getElementById('duration').textContent = 'Within 5km';
+        
+        // Display places list in nav instructions
+        const navDiv = document.getElementById('navInstructions');
+        let html = `<strong>📍 ${query}</strong><br>`;
+        html += `<strong>Found ${places.length} places:</strong><br><br>`;
+        
+        const bounds = new google.maps.LatLngBounds();
+        
+        // Add current location to bounds
+        bounds.extend({lat: currentLat, lng: currentLng});
+        
+        // Create markers for each place
+        places.forEach((place, index) => {
+            const position = {lat: place.lat, lng: place.lng};
+            bounds.extend(position);
+            
+            // Create marker
+            const marker = new google.maps.Marker({
+                position: position,
+                map: map,
+                title: place.name,
+                label: {
+                    text: (index + 1).toString(),
+                    color: 'white',
+                    fontSize: '12px',
+                    fontWeight: 'bold'
+                },
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 12,
+                    fillColor: '#f59e0b',
+                    fillOpacity: 1,
+                    strokeColor: '#fff',
+                    strokeWeight: 2
+                }
+            });
+            
+            // Create info window
+            const infoWindow = new google.maps.InfoWindow({
+                content: `
+                    <div style="padding:8px;">
+                        <strong style="color:#1e293b;font-size:14px;">${place.name}</strong><br>
+                        <span style="color:#64748b;font-size:12px;">${place.address}</span><br>
+                        ${place.rating !== 'N/A' ? `<span style="color:#f59e0b;font-size:12px;">⭐ ${place.rating}</span>` : ''}
+                        ${place.open_now !== null ? `<br><span style="color:${place.open_now ? '#22c55e' : '#ef4444'};font-size:11px;">${place.open_now ? 'Open Now' : 'Closed'}</span>` : ''}
+                    </div>
+                `
+            });
+            
+            marker.addListener('click', () => {
+                // Close all other info windows
+                placeMarkers.forEach(m => {
+                    if(m.infoWindow) m.infoWindow.close();
+                });
+                infoWindow.open(map, marker);
+            });
+            
+            marker.infoWindow = infoWindow;
+            placeMarkers.push(marker);
+            
+            // Add to list
+            const rating = place.rating !== 'N/A' ? ` ⭐${place.rating}` : '';
+            const status = place.open_now !== null ? (place.open_now ? ' 🟢' : ' 🔴') : '';
+            html += `${index + 1}. <strong>${place.name}</strong>${rating}${status}<br>`;
+            html += `   <small>${place.address}</small><br>`;
+        });
+        
+        navDiv.innerHTML = html;
+        navDiv.classList.add('show');
+        
+        // Fit map to show all places
+        map.fitBounds(bounds);
+        
+        // Speak the result
+        const spokenText = `Found ${places.length} ${query} near you. Check the map for locations.`;
+        const transcriptBox = document.getElementById('voiceTranscriptBox');
+        const transcriptHeader = document.getElementById('voiceTranscriptHeader');
+        const transcriptText = document.getElementById('voiceTranscriptText');
+        
+        transcriptBox.style.display = 'block';
+        transcriptHeader.style.display = 'block';
+        transcriptText.textContent = spokenText;
+        
+        if('speechSynthesis' in window){
+            speechSynthesis.cancel();
+            const speech = new SpeechSynthesisUtterance(spokenText);
+            speech.rate = 1.0;
+            speech.pitch = 1.0;
+            speech.volume = 1.0;
+            speech.lang = 'en-US';
+            speechSynthesis.speak(speech);
+        }
+        
+    } catch(e){
+        console.error('Error displaying places:', e);
+        alert('Error displaying places: ' + e.message);
+    }
+}
+
+function clearPlaceMarkers(){
+    placeMarkers.forEach(marker => {
+        if(marker.infoWindow) marker.infoWindow.close();
+        marker.setMap(null);
+    });
+    placeMarkers = [];
+}
+
+function clearRoute(){
+    if(routePolyline){
+        routePolyline.setMap(null);
+        routePolyline = null;
+    }
+    routeMarkers.forEach(m => m.setMap(null));
+    routeMarkers = [];
+    distanceLabels.forEach(label => label.setMap(null));
+    distanceLabels = [];
+    document.getElementById('navInstructions').classList.remove('show');
+}
+
+function drawRouteOnMap(encodedPolyline, steps){
+    try{
+        clearRoute();
+        clearPlaceMarkers(); // Also clear any places markers
+        if(!encodedPolyline) return;
+        const path = google.maps.geometry.encoding.decodePath(encodedPolyline);
+        routePolyline = new google.maps.Polyline({
+            path: path,
+            geodesic: true,
+            strokeColor: '#00FFAB',
+            strokeOpacity: 0.95,
+            strokeWeight: 6,
+            map: map,
+        });
+        // Fit bounds to the route
+        const bounds = new google.maps.LatLngBounds();
+        path.forEach(p => bounds.extend(p));
+        map.fitBounds(bounds);
+
+        // Add start/end markers
+        const startMarker = new google.maps.Marker({
+            position: path[0], 
+            map: map, 
+            title: 'Start', 
+            icon: {
+                path: google.maps.SymbolPath.CIRCLE, 
+                scale:8, 
+                fillColor:'#22c55e', 
+                fillOpacity:1, 
+                strokeColor:'#fff', 
+                strokeWeight:3
+            }
+        });
+        const endMarker = new google.maps.Marker({
+            position: path[path.length-1], 
+            map: map, 
+            title: 'Destination', 
+            icon: {
+                path: google.maps.SymbolPath.CIRCLE, 
+                scale:8, 
+                fillColor:'#ef4444', 
+                fillOpacity:1, 
+                strokeColor:'#fff', 
+                strokeWeight:3
+            }
+        });
+        routeMarkers.push(startMarker, endMarker);
+        
+        // Add distance labels along the route
+        if(steps && steps.length > 0){
+            let cumulativeDistance = 0;
+            steps.forEach((step, index) => {
+                if(step.end_location && step.distance){
+                    cumulativeDistance += step.distance.value / 1000; // Convert to km
+                    
+                    // Add distance marker every few steps or at significant points
+                    if(index % 3 === 0 || index === steps.length - 1){
+                        const label = new google.maps.Marker({
+                            position: step.end_location,
+                            map: map,
+                            icon: {
+                                path: google.maps.SymbolPath.CIRCLE,
+                                scale: 0
+                            },
+                            label: {
+                                text: step.distance.text,
+                                color: '#ffffff',
+                                fontSize: '12px',
+                                fontWeight: 'bold',
+                                className: 'distance-label'
+                            }
+                        });
+                        distanceLabels.push(label);
+                    }
+                }
+            });
+        }
+    } catch(e){
+        console.error('Error drawing route on map:', e);
+    }
+}
+
+</script>
+
+<!-- Google Maps API - Replace YOUR_API_KEY with actual Google Maps API key (added geometry library) -->
+<script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCuSnIyiJnQs6RTrtsN7m_aSIOfP4RT_9U&libraries=geometry&callback=initMap">
+</script>
+
+</body>
+</html>
+

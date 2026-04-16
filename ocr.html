@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>EDGE SIGHT-OCR Scanner</title>
+<meta charset="utf-8">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    height:100vh;
+    overflow:hidden;
+    background:linear-gradient(135deg,#1d4ed8 0%,#3b82f6 25%,#8b5cf6 50%,#a855f7 75%,#ec4899 100%);
+    background-size:400% 400%;
+    animation:gradientShift 12s ease infinite;
+    color:#e5e7eb;
+    position:relative;
+}
+@keyframes gradientShift{
+    0%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+    100%{background-position:0% 50%;}
+}
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background-image:
+        linear-gradient(rgba(255,255,255,0.05) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,0.05) 1px,transparent 1px);
+    background-size:50px 50px;
+    opacity:0.6;
+    animation:gridMove 20s linear infinite;
+}
+@keyframes gridMove{
+    0%{transform:translate(0,0);}
+    100%{transform:translate(50px,50px);}
+}
+body::after{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:radial-gradient(circle at 20% 30%,rgba(59,130,246,0.3),transparent 50%),
+                radial-gradient(circle at 80% 70%,rgba(168,85,247,0.3),transparent 50%);
+    animation:float 15s ease-in-out infinite;
+    pointer-events:none;
+    z-index:0;
+}
+body{
+    position:relative;
+}
+body::before{
+    z-index:0;
+}
+@keyframes float{
+    0%,100%{transform:translateY(0px) rotate(0deg);}
+    50%{transform:translateY(-30px) rotate(5deg);}
+}
+.wrapper{
+    width:92%;
+    max-width:1400px;
+    margin:32px auto;
+    position:relative;
+    z-index:1;
+    animation:fadeInUp 0.6s ease-out;
+}
+@keyframes fadeInUp{
+    from{opacity:0;transform:translateY(30px);}
+    to{opacity:1;transform:translateY(0);}
+}
+.header{
+    text-align:center;
+    margin-bottom:28px;
+}
+.header-title{
+    font-size:42px;
+    font-weight:800;
+    letter-spacing:0.05em;
+    background:linear-gradient(135deg,#fff,#e0e7ff);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    background-clip:text;
+    margin-bottom:8px;
+    text-shadow:0 4px 20px rgba(255,255,255,0.3);
+}
+.header-sub{
+    font-size:16px;
+    color:rgba(255,255,255,0.8);
+    font-weight:500;
+}
+
+.card{
+    display:flex;
+    gap:28px;
+    padding:32px;
+    border-radius:28px;
+    background:rgba(15,23,42,0.4);
+    backdrop-filter:blur(30px);
+    -webkit-backdrop-filter:blur(30px);
+    border:1px solid rgba(255,255,255,0.15);
+    box-shadow:0 24px 60px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.1);
+    animation:cardFloat 6s ease-in-out infinite;
+}
+@keyframes cardFloat{
+    0%,100%{transform:translateY(0px);}
+    50%{transform:translateY(-8px);}
+}
+
+.panel{
+    flex:1;
+    padding:24px;
+    border-radius:20px;
+    background:rgba(15,23,42,0.5);
+    backdrop-filter:blur(20px);
+    border:1px solid rgba(59,130,246,0.3);
+    box-shadow:
+        0 8px 32px rgba(0,0,0,0.3),
+        inset 0 1px 0 rgba(255,255,255,0.1),
+        0 0 40px rgba(59,130,246,0.2);
+    position:relative;
+    transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.panel:hover{
+    border-color:rgba(59,130,246,0.5);
+    box-shadow:
+        0 12px 40px rgba(0,0,0,0.4),
+        inset 0 1px 0 rgba(255,255,255,0.15),
+        0 0 60px rgba(59,130,246,0.4);
+    transform:translateY(-2px);
+}
+
+.panel h2{
+    color:#a5b4fc;
+    margin-bottom:16px;
+    font-size:18px;
+    font-weight:700;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+}
+
+#imgbox{
+    width:100%;
+    border-radius:12px;
+    border:1px solid #0ea5e9;
+    box-shadow:0 0 30px #0ea5e955;
+}
+
+.scan-line{
+    position:absolute;
+    left:10px;right:10px;
+    top:0;
+    height:2px;
+    background:linear-gradient(90deg,transparent,#22d3ee,transparent);
+    opacity:0.7;
+    animation:scan 2.3s linear infinite;
+}
+
+@keyframes scan{
+    0%{top:14%;opacity:0.2;}
+    50%{top:70%;opacity:0.9;}
+    100%{top:14%;opacity:0.2;}
+}
+
+textarea{
+    width:100%;
+    height:340px;
+    border-radius:12px;
+    background:#020617;
+    border:1px solid #4c1d95;
+    color:#e5e7eb;
+    padding:12px;
+    font-size:16px;
+    resize:none;
+    outline:none;
+    box-shadow:0 0 18px #4c1d9577 inset;
+}
+
+.status-tag{
+    position:absolute;
+    top:16px;
+    right:16px;
+    font-size:11px;
+    background:rgba(15,23,42,0.9);
+    border-radius:999px;
+    padding:4px 10px;
+    border:1px solid #22c55e;
+    color:#bbf7d0;
+    display:flex;
+    align-items:center;
+    gap:6px;
+}
+
+.status-dot{
+    width:10px;
+    height:10px;
+    border-radius:999px;
+    background:#22c55e;
+    box-shadow:0 0 12px rgba(34,197,94,0.8);
+    animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse{
+    0%,100%{opacity:1;transform:scale(1);}
+    50%{opacity:0.7;transform:scale(1.2);}
+}
+.status-tag[style*="border-color:#eab308"]{
+    border-color:rgba(234,179,8,0.4);
+    color:#facc15;
+}
+.status-tag[style*="border-color:#eab308"] .status-dot{
+    background:#eab308;
+    box-shadow:0 0 12px rgba(234,179,8,0.8);
+}
+
+@media(max-width:900px){
+    .card{flex-direction:column;gap:20px;}
+    .header-title{font-size:32px;}
+    .wrapper{width:95%;margin:20px auto;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrapper">
+
+    <div class="header">
+        <div class="header-title">OCR SCANNER</div>
+        <div class="header-sub">Camera → Text → Auto Voice → Chatbot</div>
+        <div style="margin-top:16px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+            <span style="padding:6px 14px;background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);border-radius:999px;font-size:12px;font-weight:600;border:1px solid rgba(255,255,255,0.2);">📸 Real-time Capture</span>
+            <span style="padding:6px 14px;background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);border-radius:999px;font-size:12px;font-weight:600;border:1px solid rgba(255,255,255,0.2);">🔍 Tesseract OCR</span>
+            <span style="padding:6px 14px;background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);border-radius:999px;font-size:12px;font-weight:600;border:1px solid rgba(255,255,255,0.2);">🔊 Auto Voice</span>
+        </div>
+    </div>
+
+    <div class="card">
+
+        <!-- LEFT CAMERA -->
+        <div class="panel">
+            <div class="status-tag">
+                <div class="status-dot"></div> LIVE CAMERA
+            </div>
+            <h2>Camera View</h2>
+            <div class="scan-line"></div>
+            <img id="imgbox" src="" style="display:none;">
+        </div>
+
+        <!-- RIGHT OCR -->
+        <div class="panel">
+            <div class="status-tag" style="border-color:#eab308;color:#facc15;">
+                <div class="status-dot" style="background:#eab308;box-shadow:0 0 8px #eab308;"></div> OCR + Voice
+            </div>
+            <h2>Recognized Text</h2>
+            <textarea id="ocrtext" readonly></textarea>
+        </div>
+
+    </div>
+</div>
+
+<script>
+let hasCaptured = false;
+let hasSpoken = false;
+let hasRedirected = false;
+let pollInterval = null;
+let lastStartTime = null;
+
+window.onload = () => {
+    document.getElementById("ocrtext").value = "";
+    document.getElementById("imgbox").style.display = "none";
+    
+    if (!hasCaptured) {
+        const now = new Date();
+        lastStartTime = now.getHours().toString().padStart(2,'0') + ':' + 
+                       now.getMinutes().toString().padStart(2,'0') + ':' + 
+                       now.getSeconds().toString().padStart(2,'0');
+        
+        hasCaptured = true;
+        fetch("/ocr_capture")
+            .then(res => {
+                if (!res.ok) {
+                    return res.text().then(t => {
+                        console.error("Capture failed:", t);
+                        alert("Capture failed: " + t);
+                    });
+                }
+
+                setTimeout(() => {
+                    const imgBox = document.getElementById("imgbox");
+                    imgBox.src = "/ocr_result.jpg?" + Date.now();
+                    imgBox.onload = () => {
+                        imgBox.style.display = "block";
+                    };
+                    imgBox.onerror = () => {
+                        imgBox.style.display = "none";
+                    };
+                }, 800);
+            })
+            .catch(err => {
+                console.log("Capture error:", err);
+                alert("Capture error: " + err);
+            });
+    }
+};
+
+function stopPolling() {
+    if (pollInterval !== null) {
+        clearInterval(pollInterval);
+        pollInterval = null;
+    }
+}
+
+pollInterval = setInterval(() => {
+    const imgBox = document.getElementById("imgbox");
+    imgBox.src = "/ocr_result.jpg?" + Date.now();
+    
+    imgBox.onload = function() {
+        if (this.src && this.src.includes("/ocr_result.jpg")) {
+            this.style.display = "block";
+        }
+    };
+    imgBox.onerror = function() {
+        this.style.display = "none";
+    };
+    
+    if (imgBox.complete && imgBox.naturalWidth > 0 && imgBox.src) {
+        imgBox.style.display = "block";
+    }
+
+    fetch("/ocr_text")
+        .then(r => r.text())
+        .then(text => {
+            document.getElementById("ocrtext").value = text;
+            let clean = text.trim();
+
+            if (clean !== "" && !hasSpoken) {
+                hasSpoken = true;
+                
+                stopPolling();
+
+                let speech = new SpeechSynthesisUtterance(clean);
+                speech.rate = 1.0;
+
+                speech.onend = () => {
+                    if (!hasRedirected) {
+                        hasRedirected = true;
+                        
+                        if(lastStartTime){
+                            const endNow = new Date();
+                            const endTime = endNow.getHours().toString().padStart(2,'0') + ':' + 
+                                           endNow.getMinutes().toString().padStart(2,'0') + ':' + 
+                                           endNow.getSeconds().toString().padStart(2,'0');
+                            
+                            fetch("/log_activity", {
+                                method: "POST",
+                                headers: {"Content-Type": "application/json"},
+                                body: JSON.stringify({
+                                    module: "ocr",
+                                    start_time: lastStartTime,
+                                    end_time: endTime
+                                })
+                            }).catch(err => console.log("Activity log error:", err));
+                        }
+                        
+                        setTimeout(() => {
+                            window.location.href = "/";
+                        }, 1500);
+                    }
+                };
+
+                speechSynthesis.cancel();
+                speechSynthesis.speak(speech);
+            }
+        })
+        .catch(err => {
+            console.log("Poll error:", err);
+        });
+}, 1200);
+
+window.addEventListener("beforeunload", stopPolling);
+</script>
+
+</body>
+</html>
+

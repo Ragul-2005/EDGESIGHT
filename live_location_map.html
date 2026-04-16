@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Location Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #22c55e;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: white;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .container {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .info-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+
+        .info-panel h2 {
+            color: #667eea;
+            font-size: 18px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .info-item {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .info-label {
+            color: #666;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            color: #333;
+            font-size: 16px;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+        }
+
+        .button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        #map {
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            height: 100%;
+        }
+
+        .error-message {
+            background: #ef4444;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr;
+            }
+
+            .info-panel {
+                max-height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📍 Live Location Tracker</h1>
+        <div class="status" id="status">
+            <span class="status-dot"></span>
+            <span id="statusText">Initializing...</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="info-panel">
+            <h2>📊 Location Information</h2>
+            
+            <div class="info-item">
+                <div class="info-label">Latitude</div>
+                <div class="info-value" id="latitude">--</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Longitude</div>
+                <div class="info-value" id="longitude">--</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Accuracy</div>
+                <div class="info-value" id="accuracy">--</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Altitude</div>
+                <div class="info-value" id="altitude">--</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Speed</div>
+                <div class="info-value" id="speed">--</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Last Updated</div>
+                <div class="info-value" id="lastUpdate">Never</div>
+            </div>
+
+            <button class="button" onclick="centerOnLocation()">🎯 Center on My Location</button>
+            <button class="button" onclick="refreshLocation()">🔄 Refresh Now</button>
+
+            <div id="errorContainer"></div>
+        </div>
+
+        <div id="map"></div>
+    </div>
+
+    <script>
+        let map;
+        let marker;
+        let accuracyCircle;
+        let watchId;
+        let currentPosition = null;
+
+        // Initialize Google Map
+        function initMap() {
+            // Default center (will be updated when location is obtained)
+            const defaultCenter = { lat: 0, lng: 0 };
+            
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 15,
+                center: defaultCenter,
+                mapTypeId: 'roadmap',
+                mapTypeControl: true,
+                streetViewControl: true,
+                fullscreenControl: true,
+                zoomControl: true
+            });
+
+            // Create marker
+            marker = new google.maps.Marker({
+                map: map,
+                title: "Your Location",
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 12,
+                    fillColor: "#4285F4",
+                    fillOpacity: 1,
+                    strokeColor: "#ffffff",
+                    strokeWeight: 3
+                }
+            });
+
+            // Create accuracy circle
+            accuracyCircle = new google.maps.Circle({
+                map: map,
+                fillColor: "#4285F4",
+                fillOpacity: 0.15,
+                strokeColor: "#4285F4",
+                strokeOpacity: 0.4,
+                strokeWeight: 2
+            });
+
+            // Start watching position
+            startLocationTracking();
+        }
+
+        // Start tracking user's location
+        function startLocationTracking() {
+            if (!navigator.geolocation) {
+                showError("Geolocation is not supported by your browser");
+                return;
+            }
+
+            // Options for high accuracy tracking
+            const options = {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            };
+
+            // Watch position continuously
+            watchId = navigator.geolocation.watchPosition(
+                updateLocation,
+                handleError,
+                options
+            );
+
+            updateStatus("Tracking Active", true);
+        }
+
+        // Update location on map and info panel
+        function updateLocation(position) {
+            currentPosition = position;
+            
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            const accuracy = position.coords.accuracy;
+            const altitude = position.coords.altitude;
+            const speed = position.coords.speed;
+
+            const location = { lat, lng };
+
+            // Update marker position
+            marker.setPosition(location);
+            
+            // Update accuracy circle
+            accuracyCircle.setCenter(location);
+            accuracyCircle.setRadius(accuracy);
+
+            // Center map on first location update
+            if (!map.getCenter() || (map.getCenter().lat() === 0 && map.getCenter().lng() === 0)) {
+                map.setCenter(location);
+                map.setZoom(16);
+            }
+
+            // Update info panel
+            document.getElementById('latitude').textContent = lat.toFixed(6) + '°';
+            document.getElementById('longitude').textContent = lng.toFixed(6) + '°';
+            document.getElementById('accuracy').textContent = accuracy.toFixed(1) + ' meters';
+            document.getElementById('altitude').textContent = altitude !== null ? altitude.toFixed(1) + ' m' : 'N/A';
+            document.getElementById('speed').textContent = speed !== null ? (speed * 3.6).toFixed(1) + ' km/h' : '0 km/h';
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+
+            updateStatus("Tracking Active", true);
+            clearError();
+        }
+
+        // Handle geolocation errors
+        function handleError(error) {
+            let message = '';
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    message = "Location permission denied. Please enable location access.";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    message = "Location information unavailable.";
+                    break;
+                case error.TIMEOUT:
+                    message = "Location request timed out.";
+                    break;
+                default:
+                    message = "An unknown error occurred.";
+            }
+            showError(message);
+            updateStatus("Error", false);
+        }
+
+        // Center map on current location
+        function centerOnLocation() {
+            if (currentPosition) {
+                const location = {
+                    lat: currentPosition.coords.latitude,
+                    lng: currentPosition.coords.longitude
+                };
+                map.setCenter(location);
+                map.setZoom(18);
+                
+                // Bounce marker
+                marker.setAnimation(google.maps.Animation.BOUNCE);
+                setTimeout(() => marker.setAnimation(null), 1500);
+            }
+        }
+
+        // Refresh location
+        function refreshLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    updateLocation,
+                    handleError,
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
+            }
+        }
+
+        // Update status indicator
+        function updateStatus(text, active) {
+            const statusEl = document.getElementById('status');
+            const statusText = document.getElementById('statusText');
+            statusText.textContent = text;
+            
+            if (active) {
+                statusEl.style.background = '#22c55e';
+            } else {
+                statusEl.style.background = '#ef4444';
+            }
+        }
+
+        // Show error message
+        function showError(message) {
+            const errorContainer = document.getElementById('errorContainer');
+            errorContainer.innerHTML = `<div class="error-message">⚠️ ${message}</div>`;
+        }
+
+        // Clear error message
+        function clearError() {
+            document.getElementById('errorContainer').innerHTML = '';
+        }
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (watchId) {
+                navigator.geolocation.clearWatch(watchId);
+            }
+        });
+    </script>
+
+    <!-- Google Maps JavaScript API -->
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCuSnIyiJnQs6RTrtsN7m_aSIOfP4RT_9U&callback=initMap">
+    </script>
+</body>
+</html>

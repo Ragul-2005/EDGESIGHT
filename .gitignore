@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.env
+
+# Flutter/Dart
+edgesight_app/.dart_tool/
+edgesight_app/.packages
+edgesight_app/.pub-cache/
+edgesight_app/.pub/
+edgesight_app/build/
+edgesight_app/.flutter-plugins
+edgesight_app/.flutter-plugins-dependencies
+edgesight_app/.metadata
+edgesight_app/android/.gradle/
+edgesight_app/android/local.properties
+edgesight_app/ios/Flutter/flutter_export_environment.sh
+edgesight_app/ios/Flutter/Generated.xcconfig
+edgesight_app/ios/Pods/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
